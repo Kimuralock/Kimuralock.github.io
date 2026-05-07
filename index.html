@@ -302,6 +302,42 @@
             box-shadow: 0 0 8px rgba(212, 175, 55, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
         }
+
+        /* 总进度框颜色 */
+        #summary.summary-blue, #nav-summary.summary-blue {
+            background: #1a3a5c;
+            border: 1px solid #3a7cc3;
+            color: #7ab8f5;
+            padding: 4px 12px;
+            border-radius: 4px;
+            box-shadow: 0 0 6px rgba(58,124,195,0.3);
+        }
+        #summary.summary-purple, #nav-summary.summary-purple {
+            background: #2a1a3c;
+            border: 1px solid #7b3fb0;
+            color: #c09af0;
+            padding: 4px 12px;
+            border-radius: 4px;
+            box-shadow: 0 0 6px rgba(123,63,176,0.3);
+        }
+        #summary.summary-brown, #nav-summary.summary-brown {
+            background: #3c2a1a;
+            border: 1px solid #a06b3a;
+            color: #e0b87a;
+            padding: 4px 12px;
+            border-radius: 4px;
+            box-shadow: 0 0 6px rgba(160,107,58,0.3);
+        }
+        #summary.summary-black, #nav-summary.summary-black {
+            background: #0f0f0f;
+            border: 1px solid #d4af37;
+            color: #f0e6c8;
+            padding: 4px 12px;
+            border-radius: 4px;
+            box-shadow: 0 0 8px rgba(212,175,55,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+        }
+
         .row-label {
             flex: 1;
             cursor: pointer;
@@ -362,11 +398,13 @@
         <a onclick="goHome()">← 主页</a>
         <span class="nav-divider">|</span>
         <span class="nav-current" id="navCurrent">X 防守</span>
+        <span id="nav-summary" style="margin-left: auto; font-weight: 600;"></span>
         <span class="nav-divider">|</span>
         <div class="nav-dropdown">
             <button class="nav-dropbtn" onclick="toggleDropdown(event)">其他技术 ▾</button>
             <div class="nav-dropdown-content" id="dropdownMenu">
                 <a onclick="openCourse('xguard')">X 防守</a>
+                <a onclick="openCourse('delariva')">德拉防守</a>
                 <a onclick="openCourse('butterfly')">蝴蝶防守</a>
                 <a onclick="openCourse('spider')">蜘蛛防守</a>
                 <a onclick="goHome()">查看全部技术</a>
@@ -376,7 +414,7 @@
 
     <div id="home-view">
         <h1>🥋 Jiu Jitsu ATT&CK 3.0</h1>
-
+        <div id="summary" style="text-align: center; font-size: 1.2em; margin-bottom: 20px;"></div>
         <div class="section" id="sec-takedowns">
             <div class="section-header" onclick="toggleSection('sec-takedowns')">
                 <span class="icon">🤼</span><span class="title">摔法</span><span class="badge">待修行</span><span class="arrow">▶</span>
@@ -400,12 +438,16 @@
 
         <div class="section open" id="sec-guard">
             <div class="section-header" onclick="toggleSection('sec-guard')">
-                <span class="icon">🛡️</span><span class="title">防守</span><span class="badge">1 项技术</span><span class="arrow">▶</span>
+                <span class="icon">🛡️</span><span class="title">防守</span><span class="badge">2 项技术</span><span class="arrow">▶</span>
             </div>
             <div class="sub-list">
                 <div class="sub-item" onclick="openCourse('xguard')">
                     <span class="name">X 防守</span>
                     <span class="progress" id="prog-xguard">修行中...</span>
+                </div>
+                <div class="sub-item" onclick="openCourse('delariva')">
+                    <span class="name">德拉防守</span>
+                    <span class="progress" id="prog-delariva">修行中...</span>
                 </div>
                 <div class="sub-item coming-soon"><span class="name">蝴蝶防守</span><span class="progress" id="prog-butterfly">待修行</span></div>
                 <div class="sub-item coming-soon"><span class="name">蜘蛛防守</span><span class="progress" id="prog-spider">待修行</span></div>
@@ -433,6 +475,7 @@
 
         const courseNames = {
             'xguard': 'X 防守',
+            'delariva': '德拉防守',
             'butterfly': '蝴蝶防守',
             'spider': '蜘蛛防守'
         };
@@ -443,6 +486,8 @@
             courseNav.style.display = 'flex';
             navCurrent.textContent = courseNames[key] || key;
             if (key === 'xguard') renderXGuard();
+            if (key === 'delariva') renderDeLaRivaGuard();
+            updateTotalSummary();
         }
 
         function goHome() {
@@ -492,19 +537,96 @@
         }
 
         function updateAllProgress() {
-    const courses = [
-        { elId: 'prog-xguard', storageKey: 'xguard_student_data_v3' },
-        { elId: 'prog-butterfly', storageKey: 'butterfly_student_data_v3' },
-        { elId: 'prog-spider', storageKey: 'spider_student_data_v3' }
-    ];
-    courses.forEach(c => {
-        const el = document.getElementById(c.elId);
-        if (!el) return;
-        el.textContent = ''; // 清空进度文字，不再显示计数
-    });
-}
+            const courses = [
+                { elId: 'prog-xguard', storageKey: 'xguard_student_data_v3' },
+                { elId: 'prog-delariva', storageKey: 'delariva_student_data_v3' },
+                { elId: 'prog-butterfly', storageKey: 'butterfly_student_data_v3' },
+                { elId: 'prog-spider', storageKey: 'spider_student_data_v3' }
+            ];
+            courses.forEach(c => {
+                const el = document.getElementById(c.elId);
+                if (!el) return;
+                el.textContent = '';
+            });
+            updateTotalSummary();
+        }
 
-        const defaultItems = {
+        function updateTotalSummary() {
+            let totalItems = 0;
+            const colorCount = { blue: 0, purple: 0, brown: 0, black: 0 };
+
+            const allKeys = [
+                'xguard_student_data_v3',
+                'delariva_student_data_v3',
+                'butterfly_student_data_v3',
+                'spider_student_data_v3'
+            ];
+
+            allKeys.forEach(key => {
+                const raw = localStorage.getItem(key);
+                if (!raw) return;
+                try {
+                    const data = JSON.parse(raw);
+                    if (data && data.items && data.proficiency) {
+                        for (const sectionKey of Object.keys(data.items)) {
+                            const items = data.items[sectionKey];
+                            const profs = data.proficiency[sectionKey] || [];
+                            items.forEach((item, index) => {
+                                if (item && item.trim() !== '') {
+                                    totalItems++;
+                                    const level = profs[index];
+                                    if (level && ['blue', 'purple', 'brown', 'black'].includes(level)) {
+                                        colorCount[level]++;
+                                    }
+                                }
+                            });
+                        }
+                    }
+                } catch (e) {}
+            });
+
+            const blackCoverage = totalItems > 0 ? colorCount.black / totalItems : 0;
+            const brownCoverage = totalItems > 0 ? (colorCount.brown + colorCount.black) / totalItems : 0;
+            const purpleCoverage = totalItems > 0 ? (colorCount.purple + colorCount.brown + colorCount.black) / totalItems : 0;
+            const blueCoverage = totalItems > 0 ? (colorCount.blue + colorCount.purple + colorCount.brown + colorCount.black) / totalItems : 0;
+
+            let activeColor = null;
+            if (totalItems > 0) {
+                if (blackCoverage >= 0.8) {
+                    activeColor = 'black';
+                } else if (brownCoverage >= 0.8) {
+                    activeColor = 'brown';
+                } else if (purpleCoverage >= 0.8) {
+                    activeColor = 'purple';
+                } else if (blueCoverage >= 0.8) {
+                    activeColor = 'blue';
+                }
+            }
+
+            const summaryEl = document.getElementById('summary');
+            const navSummary = document.getElementById('nav-summary');
+            let masteredItems = colorCount.blue + colorCount.purple + colorCount.brown + colorCount.black;
+            const text = `总进度：${masteredItems} / ${totalItems}`;
+
+            const allColors = ['blue', 'purple', 'brown', 'black'];
+            [summaryEl, navSummary].forEach(el => {
+                if (el) {
+                    allColors.forEach(c => el.classList.remove(`summary-${c}`));
+                }
+            });
+
+            if (activeColor) {
+                [summaryEl, navSummary].forEach(el => {
+                    if (el) el.classList.add(`summary-${activeColor}`);
+                });
+            }
+
+            if (summaryEl) summaryEl.textContent = text;
+            if (navSummary) navSummary.textContent = text;
+        }
+
+        // ==================== X 防守 ====================
+        const defaultItemsX = {
             basic: ['什么是X guard，X这个字母从何而来'],
             types: [],
             entry: ['对手站姿，我拿到胫骨对胫骨', '对手交叉腿时直接打入后X防守', '从被压制逃脱回防到X防守',
@@ -519,10 +641,10 @@
                 '后X防守和进攻拿背的关系'
             ],
             counter: ['绕腿', '背步', '进入菠萝乱战'],
-            videos: [] // 新增的视频板块
+            videos: []
         };
 
-        const defaultDescs = {
+        const defaultDescsX = {
             'types-desc': '取决于我们的手把和脚把，同时取决于我们头在对手身体前侧还是身体后侧亦有区分，不同的X防守也有不同的特性与控制方式，帮助学员学习全部类型及控制要点以及不同类型X防守之间的转换',
             'entry-desc': '任何情况下只要对手双腿之间有空间能让我抢到内线，我都有机会打入X防守，课程只介绍几种情况，但远不止此',
             'sweep-desc': '我们为了不生造词或者用大量尚未统一的技术名词淹没大家，无论是扫技还是破势，我们永远只以方向区分',
@@ -532,51 +654,78 @@
             'videos-desc': '以下推荐视频均来自网络，仅供学习参考。学员可自行添加、删除视频链接，并使用熟练度标记学习进度。'
         };
 
-        const profLevels = [
-            { key: 'blue', label: '了解', color: 'blue' },
-            { key: 'purple', label: '熟悉', color: 'purple' },
-            { key: 'brown', label: '掌握', color: 'brown' },
-            { key: 'black', label: '精通', color: 'black' }
-        ];
-
-        function loadXGuardData() {
-            const raw = localStorage.getItem('xguard_student_data_v3');
+        function loadCourseData(storageKey) {
+            const raw = localStorage.getItem(storageKey);
             if (raw) {
                 try { return JSON.parse(raw); } catch (e) {}
             }
             return null;
         }
 
-        function saveXGuardData(data) {
-            localStorage.setItem('xguard_student_data_v3', JSON.stringify(data));
+        function saveCourseData(storageKey, data) {
+            localStorage.setItem(storageKey, JSON.stringify(data));
         }
 
-        function getInitialXGuardData() {
-            const saved = loadXGuardData();
-            if (saved) return saved;
-            const data = { items: {}, descs: {}, proficiency: {} };
-            for (const [key, arr] of Object.entries(defaultItems)) {
-                data.items[key] = [...arr];
+        function getInitialCourseData(storageKey, defaultItems, defaultDescs) {
+        const saved = loadCourseData(storageKey);
+         // 以默认配置为蓝本，如果已有存储数据，则会用存储数据覆盖
+        const data = { items: {}, descs: {}, proficiency: {} };
+    
+        // 1. 先深拷贝默认配置，确保基础结构是完整的
+        for (const [key, arr] of Object.entries(defaultItems)) {
+        data.items[key] = [...arr];
+        }
+        for (const [key, val] of Object.entries(defaultDescs)) {
+        data.descs[key] = val;
+        }
+    
+        // 2. 如果有已存储的数据，就把它“安全地”合并进来
+        if (saved) {
+        // 合并说明文字（descs）：只更新我们已知的键，不能丢失默认新增的描述
+        if (saved.descs) {
+            for (const key of Object.keys(defaultDescs)) {
+                if (saved.descs[key] !== undefined) {
+                    data.descs[key] = saved.descs[key];
+                }
             }
-            for (const [key, val] of Object.entries(defaultDescs)) {
-                data.descs[key] = val;
+        }
+        // 合并旧数据板块（items）：对于默认配置里已有的板块，用旧数据覆盖
+        if (saved.items) {
+            for (const key of Object.keys(defaultItems)) {
+                if (saved.items[key]) {
+                    data.items[key] = saved.items[key];
+                }
             }
-            return data;
+        }
+        // 最后合并熟练度（proficiency）
+        if (saved.proficiency) {
+            data.proficiency = saved.proficiency;
+        }
+        
+        // 【关键】确保熟练度里也有我们所有板块的key，防止后面出错
+        for (const key of Object.keys(defaultItems)) {
+            if (!data.proficiency[key]) {
+                data.proficiency[key] = [];
+            }
+        }
+        }
+    
+        return data;
         }
 
-        let xguardData = getInitialXGuardData();
+        let xguardData = getInitialCourseData('xguard_student_data_v3', defaultItemsX, defaultDescsX);
 
         function persistXGuard() {
-            saveXGuardData(xguardData);
+            saveCourseData('xguard_student_data_v3', xguardData);
         }
 
         function renderXGuard() {
             let html = '';
             html += '<h2>X Guard 基础</h2>';
-            html += renderSection('basic', false);
+            html += renderSection(xguardData, 'basic', false);
 
             html += '<h3>X guard 类型与控制要点</h3>';
-            html += renderSection('types', true, 'types-desc');
+            html += renderSection(xguardData, 'types', true, 'types-desc');
 
             html += `<table>
                 <thead><tr><th>头的位置</th><th>脚把方式</th><th>近侧脚在上</th><th>远侧脚在上</th></tr></thead>
@@ -589,50 +738,129 @@
             </table>`;
 
             html += '<h3>X 防守的打入</h3>';
-            html += renderSection('entry', true, 'entry-desc');
+            html += renderSection(xguardData, 'entry', true, 'entry-desc');
 
             html += '<h3>X 防守的扫技</h3>';
-            html += renderSection('sweep', true, 'sweep-desc');
+            html += renderSection(xguardData, 'sweep', true, 'sweep-desc');
 
             html += '<h3>X 防守的降服进攻</h3>';
-            html += renderSection('submission', true, 'submission-desc');
+            html += renderSection(xguardData, 'submission', true, 'submission-desc');
 
             html += '<h3>X 防守的转换</h3>';
-            html += renderSection('transition', true, 'transition-desc');
+            html += renderSection(xguardData, 'transition', true, 'transition-desc');
 
             html += '<h3>X 防守的针对性过防</h3>';
-            html += renderSection('counter', true, 'counter-desc');
+            html += renderSection(xguardData, 'counter', true, 'counter-desc');
 
             html += '<h3>推荐视频教程</h3>';
-            html += renderSection('videos', true, 'videos-desc');
+            html += renderSection(xguardData, 'videos', true, 'videos-desc');
 
             courseContent.innerHTML = html;
         }
 
-        function renderSection(key, hasDesc, descKey) {
+        // ==================== 德拉防守 ====================
+        const defaultItemsDeLaRiva = {
+            basic: ['当我们拿到对手一侧脚的手把控制，同时配合同侧脚由外向内勾住对手腿部的防守，就是德拉防守'],
+            types: ['传统德拉，以破势为主', '新式德拉，以压迫膝盖强迫转身为控制方式', '手把以及辅助腿的抉择',
+                '无道服德拉，以及进一步压迫膝盖的逆向收割reverse reap'
+            ],
+            entry: ['拉入德拉防守', '对手从封闭防守中站立时打入', '坐防打入德拉防守'],
+            sweep: ['前', '后', '左', '右', 'forcing kneeling', 'reverse reap'],
+            submission: ['腿锁', '臂锁及肩锁', '绞技'],
+            transition: ['德拉与逆德拉', 'R防守', '转换到传统侍者防守', '进入菠萝', '进入矩阵'],
+            counter: ['如何对抗破势','长步', '切膝', '压低对手德拉脚勾','如何对抗reaping','腿锁反击'],
+            videos: []
+        };
+
+        const defaultDescsDeLaRiva = {
+            'types-desc': '取决于我们的把位和控制方式',
+            'entry-desc': '任意时候只要我们能够建立对对手单侧腿的手把加腿把控制时，通常情况是在对手站姿重心较高空间较大时打入',
+            'sweep-desc': '德拉除开传统的方向破势，还有通过压迫膝盖或者reverse reap强迫对手转向或倒地的方式，这部分不同于传统基于重心和支撑的破势，视情况掌握',
+            'submission-desc': '和大部分防守类似，德拉的降服进攻也可以分为三大方向',
+            'transition-desc': '德拉防守同样可以或主动或被动转换到非常多的防守或位置',
+            'videos-desc': '以下推荐视频均来自网络，仅供学习参考。学员可自行添加、删除视频链接，并使用熟练度标记学习进度。',
+            'counter-desc': '知己知彼方能百战百胜，对手不是第一天练柔术的菜鸟，面对我们的德拉防守，世界级选手会怎么做？以及如果我们面对德拉防守该如何应对。'
+        };
+
+        let delarivaData = getInitialCourseData('delariva_student_data_v3', defaultItemsDeLaRiva, defaultDescsDeLaRiva);
+
+        function persistDeLaRiva() {
+            saveCourseData('delariva_student_data_v3', delarivaData);
+        }
+
+        function renderDeLaRivaGuard() {
+            let html = '';
+            html += '<h2>德拉防守</h2>';
+            html += renderSection(delarivaData, 'basic', false);
+
+            html += '<h3>类型与控制要点</h3>';
+            html += renderSection(delarivaData, 'types', true, 'types-desc');
+
+            html += '<h3>德拉防守的打入</h3>';
+            html += renderSection(delarivaData, 'entry', true, 'entry-desc');
+
+            html += '<h3>德拉防守的扫技</h3>';
+            html += renderSection(delarivaData, 'sweep', true, 'sweep-desc');
+
+            html += '<h3>德拉防守的降服进攻</h3>';
+            html += renderSection(delarivaData, 'submission', true, 'submission-desc');
+
+            html += '<h3>德拉防守的转换</h3>';
+            html += renderSection(delarivaData, 'transition', true, 'transition-desc');
+
+            html += '<h3>推荐视频教程</h3>';
+            html += renderSection(delarivaData, 'videos', true, 'videos-desc');
+
+            html += '<h3>德拉防守的针对性过防</h3>';
+            html += renderSection(delarivaData, 'counter', true, 'counter-desc');
+
+            courseContent.innerHTML = html;
+        }
+
+        function renderSection(courseData, key, hasDesc, descKey) {
             let html = '';
             if (hasDesc && descKey) {
                 html +=
-                    `<div class="sec-desc" data-desc-key="${descKey}" onclick="editDesc(this, '${descKey}')">${xguardData.descs[descKey] || ''}</div>`;
+                    `<div class="sec-desc" data-desc-key="${descKey}" onclick="editDesc(this, '${descKey}')">${courseData.descs[descKey] || ''}</div>`;
             }
-            const items = xguardData.items[key] || [];
+            const items = courseData.items[key] || [];
             items.forEach((text, index) => {
                 html += '<div class="row">';
                 html += '<div class="prof-group">';
-                const currentProf = (xguardData.proficiency[key] && xguardData.proficiency[key][index]) || '';
+                const currentProf = (courseData.proficiency[key] && courseData.proficiency[key][index]) || '';
+                const profLevels = [
+                    { key: 'blue', label: '了解', color: 'blue' },
+                    { key: 'purple', label: '熟悉', color: 'purple' },
+                    { key: 'brown', label: '掌握', color: 'brown' },
+                    { key: 'black', label: '精通', color: 'black' }
+                ];
                 profLevels.forEach(level => {
                     const activeClass = currentProf === level.key ? ` active ${level.color}` : '';
                     html +=
-                        `<button class="prof-btn${activeClass}" onclick="setProf('${key}',${index},'${level.key}')">${level.label}</button>`;
+                        `<button class="prof-btn${activeClass}" onclick="setCourseProf('${key}',${index},'${level.key}')">${level.label}</button>`;
                 });
                 html += '</div>';
-                html +=
-                    `<span class="row-label" onclick="editLabel(this, '${key}', ${index})">${escapeHtml(text)}</span>`;
-                html += `<button class="del-btn" onclick="deleteItem('${key}', ${index})">✕</button>`;
+                html += `<span class="row-label" onclick="editCourseLabel(this, '${key}', ${index})">${escapeHtml(text || '')}</span>`;
+                html += `<button class="del-btn" onclick="deleteCourseItem('${key}', ${index})">✕</button>`;
                 html += '</div>';
             });
-            html += `<button class="add-btn" onclick="addItem('${key}')">+ 添加</button>`;
+            html += `<button class="add-btn" onclick="addCourseItem('${key}')">+ 添加</button>`;
             return html;
+        }
+
+        function getCurrentCourseData() {
+            if (navCurrent.textContent === '德拉防守') return delarivaData;
+            return xguardData;
+        }
+
+        function getCurrentPersist() {
+            if (navCurrent.textContent === '德拉防守') return persistDeLaRiva;
+            return persistXGuard;
+        }
+
+        function getCurrentRender() {
+            if (navCurrent.textContent === '德拉防守') return renderDeLaRivaGuard;
+            return renderXGuard;
         }
 
         function escapeHtml(str) {
@@ -642,41 +870,50 @@
         }
 
         window.editDesc = function(el, descKey) {
+            const courseData = getCurrentCourseData();
+            const persist = getCurrentPersist();
             if (el.classList.contains('editing')) return;
             el.classList.add('editing');
             const input = document.createElement('input');
-            input.value = xguardData.descs[descKey] || '';
+            input.value = courseData.descs[descKey] || '';
             el.textContent = '';
             el.appendChild(input);
             input.focus();
             const save = () => {
-                xguardData.descs[descKey] = input.value;
-                persistXGuard();
+                courseData.descs[descKey] = input.value;
+                persist();
                 el.classList.remove('editing');
-                el.textContent = xguardData.descs[descKey] || '';
+                el.textContent = courseData.descs[descKey] || '';
             };
             input.addEventListener('blur', save);
             input.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); });
         };
 
-        window.setProf = function(key, index, levelKey) {
-            if (!xguardData.proficiency[key]) xguardData.proficiency[key] = [];
-            if (xguardData.proficiency[key][index] === levelKey) {
-                xguardData.proficiency[key][index] = '';
+        window.setCourseProf = function(key, index, levelKey) {
+            const courseData = getCurrentCourseData();
+            const persist = getCurrentPersist();
+            const render = getCurrentRender();
+            if (!courseData.proficiency[key]) courseData.proficiency[key] = [];
+            if (courseData.proficiency[key][index] === levelKey) {
+                courseData.proficiency[key][index] = '';
             } else {
-                xguardData.proficiency[key][index] = levelKey;
+                courseData.proficiency[key][index] = levelKey;
             }
-            persistXGuard();
-            renderXGuard();
+            persist();
+            render();
+            updateTotalSummary();
         };
 
-        window.editLabel = function(el, key, index) {
+        window.editCourseLabel = function(el, key, index) {
+            const courseData = getCurrentCourseData();
+            const persist = getCurrentPersist();
+            const render = getCurrentRender();
             const input = document.createElement('input');
-            input.value = xguardData.items[key][index];
+            input.value = courseData.items[key][index] || '';
             const finish = () => {
-                xguardData.items[key][index] = input.value;
-                persistXGuard();
-                renderXGuard();
+                courseData.items[key][index] = input.value;
+                persist();
+                render();
             };
             input.addEventListener('blur', finish);
             input.addEventListener('keydown', (e) => { if (e.key === 'Enter') finish(); });
@@ -685,22 +922,29 @@
             input.focus();
         };
 
-        window.deleteItem = function(key, index) {
-            xguardData.items[key].splice(index, 1);
-            if (xguardData.proficiency[key]) xguardData.proficiency[key].splice(index, 1);
-            persistXGuard();
-            renderXGuard();
+        window.deleteCourseItem = function(key, index) {
+            const courseData = getCurrentCourseData();
+            const persist = getCurrentPersist();
+            const render = getCurrentRender();
+            courseData.items[key].splice(index, 1);
+            if (courseData.proficiency[key]) courseData.proficiency[key].splice(index, 1);
+            persist();
+            render();
         };
 
-        window.addItem = function(key) {
-            xguardData.items[key].push('');
-            if (!xguardData.proficiency[key]) xguardData.proficiency[key] = [];
-            xguardData.proficiency[key].push('');
-            persistXGuard();
-            renderXGuard();
+        window.addCourseItem = function(key) {
+            const courseData = getCurrentCourseData();
+            const persist = getCurrentPersist();
+            const render = getCurrentRender();
+            courseData.items[key].push('');
+            if (!courseData.proficiency[key]) courseData.proficiency[key] = [];
+            courseData.proficiency[key].push('');
+            persist();
+            render();
         };
 
         updateAllProgress();
+        updateTotalSummary();
     </script>
 </body>
 </html>
