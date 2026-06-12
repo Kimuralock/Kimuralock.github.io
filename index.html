@@ -101,34 +101,6 @@
                 max-height: 50vh;
                 position: absolute;
             }
-            .row {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 4px;
-                padding: 8px 6px;
-            }
-        @media (max-width: 600px) {
-            .row {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 4px;
-                padding: 8px 6px;
-            }
-            .row .prof-group {
-                align-self: flex-end;
-            }
-            .row-label {
-                min-width: 0;
-                padding: 2px 4px;
-            }
-        }
-            .row .prof-group {
-                align-self: flex-end;
-            }
-            .row-label {
-                min-width: 0;
-                padding: 2px 4px;
-            }
         }
 
         .nav-dropdown-content.show {
@@ -303,15 +275,50 @@
             display: flex;
             align-items: center;
             margin: 4px 0;
-            padding: 6px 6px;
-            border-radius: 6px;
+            padding: 8px 10px;
+            border-radius: 8px;
             gap: 10px;
             flex-wrap: wrap;
-            flex-direction: row-reverse;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+        }
+        .row .prof-group {
+            order: 2;
+            margin-left: auto;
+        }
+        .row .row-label {
+            order: 1;
+            flex: 1 1 120px;
+        }
+        .row .del-btn {
+            order: 2;
+        }
+        @media (max-width: 600px) {
+            .row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 4px;
+                padding: 8px 6px;
+            }
+            .row .prof-group {
+                order: 1;
+                align-self: flex-end;
+                margin-left: 0;
+            }
+            .row .row-label {
+                order: 0;
+                min-width: 0;
+                padding: 2px 4px;
+            }
+            .row .del-btn {
+                order: 1;
+                align-self: flex-end;
+            }
         }
 
         .row:hover {
-            background: #222;
+            border-color: rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.07)
         }
 
         .prof-group {
